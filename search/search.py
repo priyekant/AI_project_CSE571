@@ -135,7 +135,7 @@ def breadthFirstSearch(problem):
     myQueue = util.Queue()
     pathQueue = util.Queue()
     for succ in successors:
-        if succ not in myQueue.list and succ[0] not in visited:
+        if succ not in frontier and succ[0] not in visited:
             pathList = list()
             pathList.insert(len(pathList),succ[1])
             pathQueue.push(pathList)
@@ -161,7 +161,38 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    actionsList = []
+    if problem.isGoalState(problem.getStartState()):
+        return actionsList
+    visited = set([])
+    frontier = list()
+    visited.add(problem.getStartState())
+    successors = problem.getSuccessors(problem.getStartState())
+    myQueue = util.PriorityQueue()
+    pathQueue = util.PriorityQueue()
+    for succ in successors:
+        if succ not in frontier and succ[0] not in visited:
+            pathList = list()
+            pathList.insert(len(pathList),succ[1])
+            pathQueue.push(pathList,succ[2])
+            myQueue.push(succ,succ[2])
+            frontier.insert(len(frontier),succ[0])
+
+    while myQueue.isEmpty() == False:
+        nextNode = myQueue.pop()
+        nextPath = pathQueue.pop()
+        visited.add(nextNode[0])
+        if problem.isGoalState(nextNode[0]):
+            pathList = list(nextPath)
+            return pathList
+        successors = problem.getSuccessors(nextNode[0])
+        for succ in successors:
+            if succ[0] not in frontier and succ[0] not in visited:
+                pathList = list(nextPath)
+                pathList.insert(len(pathList),succ[1])
+                pathQueue.push(pathList,succ[2])
+                myQueue.push(succ,succ[2])
+                frontier.insert(len(frontier),succ[0])
 
 def nullHeuristic(state, problem=None):
     """
