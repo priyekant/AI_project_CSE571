@@ -175,8 +175,8 @@ def uniformCostSearch(problem):
             pathList = list()
             pathList.insert(len(pathList),succ[1])
             pathQueue[succ[0]] = pathList
-            myQueue.push(succ[0],succ[2])
-            frontier[succ[0]]=succ[2]
+            myQueue.push(succ[0],succ[-1])
+            frontier[succ[0]]=succ[-1]
 
     while myQueue.isEmpty() == False:
         nextNode = myQueue.pop()
@@ -191,16 +191,16 @@ def uniformCostSearch(problem):
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],succ[2])
-                frontier[succ[0]]=succ[2]
-            elif succ[0] in frontier and frontier[succ[0]] > succ[2]:
+                myQueue.push(succ[0],succ[-1])
+                frontier[succ[0]]=succ[-1]
+            elif succ[0] in frontier and frontier[succ[0]] > succ[-1]:
                 frontier.pop(succ[0], None)
                 pathQueue.pop(succ[0], None)
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],succ[2])
-                frontier[succ[0]]=succ[2]
+                myQueue.push(succ[0],succ[-1])
+                frontier[succ[0]]=succ[-1]
 
 
 def nullHeuristic(state, problem=None):
@@ -213,7 +213,48 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    actionsList = []
+    if problem.isGoalState(problem.getStartState()):
+        return actionsList
+    visited = set([])
+    frontier = {}
+    visited.add(problem.getStartState())
+    successors = problem.getSuccessors(problem.getStartState())
+    myQueue = util.PriorityQueue()
+    pathQueue = {}
+    for succ in successors:
+        if succ not in frontier and succ[0] not in visited:
+            combinedCost = succ[-1]+heuristic(succ[0],problem)
+            pathList = list()
+            pathList.insert(len(pathList),succ[1])
+            pathQueue[succ[0]] = pathList
+            myQueue.push(succ[0],combinedCost)
+            frontier[succ[0]]=combinedCost
+
+    while myQueue.isEmpty() == False:
+        nextNode = myQueue.pop()
+        nextPath = pathQueue.pop(nextNode, None)
+        visited.add(nextNode)
+        if problem.isGoalState(nextNode):
+            pathList = list(nextPath)
+            return pathList
+        successors = problem.getSuccessors(nextNode)
+        for succ in successors:
+            combinedCost = succ[-1]+heuristic(succ[0],problem)
+            if succ[0] not in frontier and succ[0] not in visited:
+                pathList = list(nextPath)
+                pathList.insert(len(pathList),succ[1])
+                pathQueue[succ[0]] = pathList
+                myQueue.push(succ[0],succ[-1]+heuristic(succ[0],problem))
+                frontier[succ[0]]=succ[-1]+heuristic(succ[0],problem)
+            elif succ[0] in frontier and frontier[succ[0]] > combinedCost:
+                frontier.pop(succ[0], None)
+                pathQueue.pop(succ[0], None)
+                pathList = list(nextPath)
+                pathList.insert(len(pathList),succ[1])
+                pathQueue[succ[0]] = pathList
+                myQueue.push(succ[0],combinedCost)
+                frontier[succ[0]]=combinedCost
 
 
 # Abbreviations
