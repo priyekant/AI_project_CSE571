@@ -165,34 +165,43 @@ def uniformCostSearch(problem):
     if problem.isGoalState(problem.getStartState()):
         return actionsList
     visited = set([])
-    frontier = list()
+    frontier = {}
     visited.add(problem.getStartState())
     successors = problem.getSuccessors(problem.getStartState())
     myQueue = util.PriorityQueue()
-    pathQueue = util.PriorityQueue()
+    pathQueue = {}
     for succ in successors:
         if succ not in frontier and succ[0] not in visited:
             pathList = list()
             pathList.insert(len(pathList),succ[1])
-            pathQueue.push(pathList,succ[2])
-            myQueue.push(succ,succ[2])
-            frontier.insert(len(frontier),succ[0])
+            pathQueue[succ[0]] = pathList
+            myQueue.push(succ[0],succ[2])
+            frontier[succ[0]]=succ[2]
 
     while myQueue.isEmpty() == False:
         nextNode = myQueue.pop()
-        nextPath = pathQueue.pop()
-        visited.add(nextNode[0])
-        if problem.isGoalState(nextNode[0]):
+        nextPath = pathQueue.pop(nextNode, None)
+        visited.add(nextNode)
+        if problem.isGoalState(nextNode):
             pathList = list(nextPath)
             return pathList
-        successors = problem.getSuccessors(nextNode[0])
+        successors = problem.getSuccessors(nextNode)
         for succ in successors:
             if succ[0] not in frontier and succ[0] not in visited:
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
-                pathQueue.push(pathList,succ[2])
-                myQueue.push(succ,succ[2])
-                frontier.insert(len(frontier),succ[0])
+                pathQueue[succ[0]] = pathList
+                myQueue.push(succ[0],succ[2])
+                frontier[succ[0]]=succ[2]
+            elif succ[0] in frontier and frontier[succ[0]] > succ[2]:
+                frontier.pop(succ[0], None)
+                pathQueue.pop(succ[0], None)
+                pathList = list(nextPath)
+                pathList.insert(len(pathList),succ[1])
+                pathQueue[succ[0]] = pathList
+                myQueue.push(succ[0],succ[2])
+                frontier[succ[0]]=succ[2]
+
 
 def nullHeuristic(state, problem=None):
     """
