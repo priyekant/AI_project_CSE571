@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import sys
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -405,12 +406,11 @@ def cornersHeuristic(state, problem):
     cornersVisited = list(cornersVisited)
     currentHeuristic = 0
     while 0 in cornersVisited:
-        minIndex = cornersVisited.index(0)
-        minimum = ((currentPosition[0] - corners[minIndex][0]) ** 2 + (currentPosition[1] - corners[minIndex][1]) ** 2 ) ** 0.5
+        minimum = sys.maxint
         for index in range(0,4):
             if(cornersVisited[index] == 0):
                 dist = ((currentPosition[0] - corners[index][0]) ** 2 + (currentPosition[1] - corners[index][1]) ** 2 ) ** 0.5
-                if(dist <= minimum):
+                if(dist < minimum):
                     minimum = dist
                     minIndex = index
         currentHeuristic += minimum
@@ -516,12 +516,11 @@ def foodHeuristic(state, problem):
     foodVisited = list(foodVisited)
     currentHeuristic = 0
     while 0 in foodVisited:
-        minIndex = foodVisited.index(0)
-        minimum = abs(currentPosition[0] - foodList[minIndex][0]) + abs(currentPosition[1] - foodList[minIndex][1])
+        minimum = sys.maxint
         for index in range(0,len(foodList)):
             if(foodVisited[index] == 0):
                 dist = abs(currentPosition[0] - foodList[index][0]) + abs(currentPosition[1] - foodList[index][1])
-                if(dist <= minimum):
+                if(dist < minimum):
                     minimum = dist
                     minIndex = index
         currentHeuristic += minimum
