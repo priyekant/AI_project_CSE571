@@ -200,7 +200,7 @@ def uniformCostSearch(problem):
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],succ[-1])
+                myQueue.update(succ[0],succ[-1])
                 frontier[succ[0]]=succ[-1]
 
 
@@ -235,28 +235,28 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while myQueue.isEmpty() == False:
         nextNode = myQueue.pop()
         nextPath = pathQueue.pop(nextNode, None)
+        costForPath = frontier.pop(nextNode,None)-heuristic(nextNode,problem)
         visited.add(nextNode)
         if problem.isGoalState(nextNode):
             pathList = list(nextPath)
             return pathList
         successors = problem.getSuccessors(nextNode)
         for succ in successors:
-            combinedCost = succ[-1]+heuristic(succ[0],problem)
+            combinedCost = succ[-1]+costForPath+heuristic(succ[0],problem)
             if succ[0] not in frontier and succ[0] not in visited:
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],succ[-1]+heuristic(succ[0],problem))
-                frontier[succ[0]]=succ[-1]+heuristic(succ[0],problem)
+                myQueue.push(succ[0],combinedCost)
+                frontier[succ[0]]=combinedCost
             elif succ[0] in frontier and frontier[succ[0]] > combinedCost:
                 frontier.pop(succ[0], None)
                 pathQueue.pop(succ[0], None)
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],combinedCost)
+                myQueue.update(succ[0],combinedCost)
                 frontier[succ[0]]=combinedCost
-
 
 # Abbreviations
 bfs = breadthFirstSearch
