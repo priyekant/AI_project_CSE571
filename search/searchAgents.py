@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -295,14 +295,34 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        startState = list(self.startingPosition)
+        for corner in self.corners:
+            if corner == self.startingPosition:
+                startState.append(1)
+            else:
+                startState.append(0)
+        startState = tuple(startState)
+        return startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        isCorner = False
+        targetState = list()
+        targetState.append(state[0])
+        targetState.append(state[1])
+        targetState = tuple(targetState)
+        for corner in self.corners:
+            if corner == targetState:
+                isCorner = True
+        if isCorner == False:
+            return False
+        for index in range(2,6):
+            if state[index] == 0:
+                return False
+        return True
 
     def getSuccessors(self, state):
         """
@@ -323,6 +343,27 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
+            x,y = state[0],state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 1
+                isCorner = False
+                for index in range(len(self.corners)):
+                    if nextState == self.corners[index]:
+                        isCorner = True
+                        i = index
+                        break
+                nextState = list(nextState)
+                nextState.append(state[2])
+                nextState.append(state[3])
+                nextState.append(state[4])
+                nextState.append(state[5])
+                if isCorner == True:
+                    nextState[i+2] = 1
+                nextState = tuple(nextState)
+                successors.append( ( nextState, action, cost) )
 
             "*** YOUR CODE HERE ***"
 
