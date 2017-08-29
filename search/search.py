@@ -181,6 +181,7 @@ def uniformCostSearch(problem):
     while myQueue.isEmpty() == False:
         nextNode = myQueue.pop()
         nextPath = pathQueue.pop(nextNode, None)
+        costTillNow=frontier.pop(nextNode, None)
         visited.add(nextNode)
         if problem.isGoalState(nextNode):
             pathList = list(nextPath)
@@ -191,9 +192,9 @@ def uniformCostSearch(problem):
                 pathList = list(nextPath)
                 pathList.insert(len(pathList),succ[1])
                 pathQueue[succ[0]] = pathList
-                myQueue.push(succ[0],succ[-1])
-                frontier[succ[0]]=succ[-1]
-            elif succ[0] in frontier and frontier[succ[0]] > succ[-1]:
+                frontier[succ[0]]=succ[-1]+costTillNow
+                myQueue.push(succ[0],frontier[succ[0]])
+            elif succ[0] in frontier and frontier[succ[0]] > succ[-1]+costTillNow:
                 frontier.pop(succ[0], None)
                 pathQueue.pop(succ[0], None)
                 pathList = list(nextPath)
