@@ -510,22 +510,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    currentPosition = position
-    foodList = foodGrid.asList()
-    foodVisited = [0] * len(foodList)
-    foodVisited = list(foodVisited)
     currentHeuristic = 0
-    while 0 in foodVisited:
-        minimum = sys.maxint
-        for index in range(0,len(foodList)):
-            if(foodVisited[index] == 0):
-                dist = abs(currentPosition[0] - foodList[index][0]) + abs(currentPosition[1] - foodList[index][1])
-                if(dist < minimum):
-                    minimum = dist
-                    minIndex = index
-        currentHeuristic += minimum
-        foodVisited[minIndex] = 1
-        currentPosition = foodGrid[minIndex]
+    foodList = foodGrid.asList()
+    for food in foodList:
+        dist = mazeDistance(position,food,problem.startingGameState)
+        if dist > currentHeuristic:
+            currentHeuristic = dist
+
     return currentHeuristic # Default to trivial solution
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -555,9 +546,7 @@ class ClosestDotSearchAgent(SearchAgent):
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -591,9 +580,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
 def mazeDistance(point1, point2, gameState):
     """
