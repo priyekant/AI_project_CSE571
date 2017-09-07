@@ -87,14 +87,16 @@ def depthFirstSearch(problem):
 
     """
     "*** YOUR CODE HERE ***"
-
+    """actionsList contains the actions that will be taken during the search of a goal node from the given start node"""
     actionsList = []
+    """if the starting node is the goal node actionslist is returned empty"""
     if problem.isGoalState(problem.getStartState()):
         return actionsList
     visited = set([])
     visited.add(problem.getStartState())
     level = 1
     successors = problem.getSuccessors(problem.getStartState())
+    """LIFO data structure stack is used in case of DFS"""
     myStack = util.Stack()
     for succ in successors:
         succList = list(succ)
@@ -135,18 +137,21 @@ def breadthFirstSearch(problem):
     myQueue = util.Queue()
     pathQueue = util.Queue()
     for succ in successors:
+        """add all the successor nodes in the queue"""
         if succ not in frontier and succ[0] not in visited:
             pathList = list()
             pathList.insert(len(pathList),succ[1])
             pathQueue.push(pathList)
             myQueue.push(succ)
             frontier.insert(len(frontier),succ[0])
-
+    """adding successors to the queue first and when popping them out of the queue will check if it is the goal state or not"""
     while myQueue.isEmpty() == False:
+        """since a queue is a FIFO data structure nodes at the same level will be traversed first when pop is called"""
         nextNode = myQueue.pop()
         nextPath = pathQueue.pop()
         visited.add(nextNode[0])
         if problem.isGoalState(nextNode[0]):
+            """if the node popped is the goal node then we will return the path to this node that is stored in a seperate queue pathQueue"""
             pathList = list(nextPath)
             return pathList
         successors = problem.getSuccessors(nextNode[0])
@@ -161,6 +166,12 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+
+    """this is same as the breadth first search, the only
+    difference is that the data structure used is a
+    priority queue and the factor used to decide priority is the
+    cost till that node"""
+
     actionsList = []
     if problem.isGoalState(problem.getStartState()):
         return actionsList
@@ -214,6 +225,11 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    """this is same as the UCS, the only
+    difference is that the factor used to decide priority is the heuristic + 
+    cost till that node"""
+
     actionsList = []
     if problem.isGoalState(problem.getStartState()):
         return actionsList

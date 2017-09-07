@@ -296,6 +296,13 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+
+        """ here each state is defined as tuple of 6
+        (x,y,c1,c2,c3,c4) where x,y denotes the coordinates
+        of current position and c1 through c4 can either have value 0 or 1
+        ci having 0 value means that the ith corner is not yet visited
+        and ci having 1 value means that the ith corner has been visited"""
+
         startState = list(self.startingPosition)
         for corner in self.corners:
             if corner == self.startingPosition:
@@ -310,6 +317,13 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+
+        """here our target is to visit all the corners so we will check if the
+        x,y value in the state matches any of the corners, if it does not then
+        we will return false. but if it matches any of the corners then we will
+        continue and check c1 through c4 values if all are 1 then this means that
+        pacman has travelled all the corners and we return true else we return false"""
+
         isCorner = False
         targetState = list()
         targetState.append(state[0])
@@ -335,7 +349,11 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-
+        """
+        here we check if the next node that we reach after taking one of the actions
+        is a corner or not. If it is a corner then we will change the corresponding ci
+        value in the state tuple to 1
+        """
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
@@ -398,6 +416,11 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
+    """
+    here we add the Euclidean distance between the current position and the
+    closest unvisited corner to the heuristic. and finally return the heuristic
+    cost when none of the corners are unvisited
+    """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
     "*** YOUR CODE HERE ***"
@@ -416,7 +439,7 @@ def cornersHeuristic(state, problem):
         currentHeuristic += minimum
         cornersVisited[minIndex] = 1
         currentPosition = corners[minIndex]
-    return currentHeuristic # Default to trivial solution
+    return currentHeuristic
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -509,6 +532,9 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+    """
+    here we are taking heuristic as the maximum maze distance for a food pallet
+    """
     "*** YOUR CODE HERE ***"
     currentHeuristic = 0
     foodList = foodGrid.asList()
