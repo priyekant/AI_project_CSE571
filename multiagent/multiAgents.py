@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -70,11 +70,53 @@ class ReflexAgent(Agent):
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
+        currentFood = currentGameState.getFood();
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        """
+        here we are going to update the score value on the basis of the distance
+        from the ghost, capsules and food
+        """
+        score = 0.0
+        """check distance from old capsule positions to know if the capsule has been eaten or not"""
+        for capsuleposition in currentGameState.getCapsules():
+            capsuledistance = manhattanDistance(capsuleposition, newPos)
+            if capsuledistance == 0:
+                """add 10 points if the new position is equal to capsule position in current state"""
+                score += 10.0
+            else:
+                """points are added to the total score, closer the capsule more the points encouraging pacman to take that path"""
+                score += 10.0/capsuledistance
+
+        """check distance from newghoststates as ghosts are also moving"""
+        for ghost in newGhostStates:
+            ghostdistance = manhattanDistance(ghost.getPosition(), newPos)
+            if ghostdistance <= 1:
+                if(ghost.scaredTimer > 0):
+                    """200 points are awarded if pacman eats ghost"""
+                    score += 200.0
+                else:
+                    """500 points are lost if ghost eats pacman"""
+                    score -= 500.0
+
+        numFood = currentGameState.getNumFood()
+        """check distance from old capsule positions to know if the capsule has been eaten or not"""
+        for x in range(currentFood.width):
+          for y in range(currentFood.height):
+            if(currentFood[x][y]):
+              fooddistance=manhattanDistance((x,y),newPos)
+              if(fooddistance==0):
+                """10 points are added to the score if pacman eats a food after takin this action"""
+                score+=10.0
+                """if in current state only one food was left and after taking this action pacman ate that food then add 500 points"""
+                if numFood == 1:
+                    score += 500.0
+              else:
+                """points are added to the total score, closer the food more the points encouraging pacman to take that path"""
+                score+=1.0/fooddistance
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -170,4 +212,3 @@ def betterEvaluationFunction(currentGameState):
 
 # Abbreviation
 better = betterEvaluationFunction
-
