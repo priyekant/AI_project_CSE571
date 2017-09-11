@@ -102,7 +102,7 @@ class ReflexAgent(Agent):
                     score -= 500.0
             else:
                 if(ghost.scaredTimer > 0):
-                    score += 10.0
+                    score += 100.0/ghostdistance
         numFood = currentGameState.getNumFood()
         """check distance from old capsule positions to know if the capsule has been eaten or not"""
         for x in range(currentFood.width):
