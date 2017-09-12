@@ -195,9 +195,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Choose one of the best actions
         scores = [self.minvalue(depth,gameState.generateSuccessor(0,action), 1) for action in legalMoves]
         bestScore = max(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-
         "Add more of your code here if you want to"
 
         return bestScore
@@ -212,8 +209,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         else:
             scores = [self.maxvalue(depth-1, gameState.generateSuccessor(agentnumber,action)) for action in legalMoves]
         bestScore = min(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
         return bestScore
 
@@ -307,9 +302,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # Choose one of the best actions
         scores = [self.expectimaxvalue(depth,gameState.generateSuccessor(0,action), 1) for action in legalMoves]
         bestScore = max(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-
         "Add more of your code here if you want to"
 
         return bestScore
