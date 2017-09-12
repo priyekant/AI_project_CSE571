@@ -200,7 +200,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         "Add more of your code here if you want to"
 
-        return bestScore,legalMoves[chosenIndex]
+        return bestScore
 
     def minvalue(self,depth, gameState, agentnumber):
         if depth == 0 or gameState.isWin() or gameState.isLose():
@@ -243,7 +243,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         bestindex = 0
         for action in legalMoves:
             interscore = self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue)
-            if score <= interscore:
+            if score < interscore:
                 score = interscore
                 bestindex = index
 
@@ -286,7 +286,47 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalMoves = gameState.getLegalActions(0)
+
+        # Choose one of the best actions
+        scores = [self.expectimaxvalue(self.depth,gameState.generateSuccessor(0,action), 1) for action in legalMoves]
+        bestScore = max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        "Add more of your code here if you want to"
+
+        return legalMoves[chosenIndex]
+
+    def maxvalue(self,depth,gameState):
+        """we check for terminal test condition, either game is over or we have
+        traversed the whole depth"""
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(0)
+
+        # Choose one of the best actions
+        scores = [self.expectimaxvalue(depth,gameState.generateSuccessor(0,action), 1) for action in legalMoves]
+        bestScore = max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+        "Add more of your code here if you want to"
+
+        return bestScore
+
+    def expectimaxvalue(self,depth, gameState, agentnumber):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(agentnumber)
+        """the last agent will again call for maxvalue instead of minvalue as it is now turn of the pacman who is a maxagent"""
+        if(agentnumber < gameState.getNumAgents() - 1):
+            scores = [self.expectimaxvalue(depth,gameState.generateSuccessor(agentnumber,action), agentnumber+1) for action in legalMoves]
+        else:
+            scores = [self.maxvalue(depth-1, gameState.generateSuccessor(agentnumber,action)) for action in legalMoves]
+        bestScore = float(sum(scores))/len(legalMoves)
+        return bestScore
+
+
 
 def betterEvaluationFunction(currentGameState):
     """
