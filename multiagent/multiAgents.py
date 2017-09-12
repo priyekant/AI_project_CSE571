@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 
 from game import Agent
 
@@ -186,6 +186,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return legalMoves[chosenIndex]
 
     def maxvalue(self,depth,gameState):
+        """we check for terminal test condition, either game is over or we have
+        traversed the whole depth"""
         if depth == 0 or gameState.isWin() or gameState.isLose():
             return self.evaluationFunction(gameState)
         legalMoves = gameState.getLegalActions(0)
@@ -204,6 +206,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if depth == 0 or gameState.isWin() or gameState.isLose():
             return self.evaluationFunction(gameState)
         legalMoves = gameState.getLegalActions(agentnumber)
+        """the last agent will again call for maxvalue instead of minvalue as it is now turn of the pacman who is a maxagent"""
         if(agentnumber < gameState.getNumAgents() - 1):
             scores = [self.minvalue(depth,gameState.generateSuccessor(agentnumber,action), agentnumber+1) for action in legalMoves]
         else:
@@ -225,7 +228,44 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        score,move = self.maxalphabetavalue(self.depth,gameState,-sys.maxint,sys.maxint)
+
+    def maxalphabetavalue(self,depth,gameState,alphavalue,betavalue):
+        """we check for terminal test condition, either game is over or we have
+        traversed the whole depth"""
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(0)
+
+        score = -sys.maxint
+        index = 0
+        for action in legalMoves:
+            score = max(score,self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue))
+            if score >= betavalue:
+                return score,legalMoves[index]
+            alphavalue = max(alphavalue,score)
+            index += 1
+
+        return score,legalMoves[index-1]
+
+    def minalphabetavalue(self,depth,gameState,agentnumber,alphavalue,betavalue):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(agentnumber)
+        score = sys.maxint
+        """the last agent will again call for maxvalue instead of minvalue as it is now turn of the pacman who is a maxagent"""
+
+        for action in legalMoves:
+            if(agentnumber < gameState.getNumAgents() - 1):
+                score = min(score,self.minalphabetavalue(depth,gameState.generateSuccessor(agentnumber,action), agentnumber+1,alphavalue,betavalue))
+            else:
+                score = min(score,self.maxalphabetavalue(depth-1,gameState.generateSuccessor(agentnumber,action),alphavalue,betavalue))
+            if score <= alphavalue:
+                return score
+            betavalue = min(betavalue,score)
+
+        return score
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
