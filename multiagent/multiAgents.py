@@ -229,6 +229,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         score,move = self.maxalphabetavalue(self.depth,gameState,-sys.maxint,sys.maxint)
+        return move
 
     def maxalphabetavalue(self,depth,gameState,alphavalue,betavalue):
         """we check for terminal test condition, either game is over or we have
@@ -239,14 +240,19 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         score = -sys.maxint
         index = 0
+        bestindex = 0
         for action in legalMoves:
-            score = max(score,self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue))
+            interscore = self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue)
+            if score <= interscore:
+                score = interscore
+                bestindex = index
+
             if score >= betavalue:
-                return score,legalMoves[index]
+                return score,legalMoves[bestindex]
             alphavalue = max(alphavalue,score)
             index += 1
 
-        return score,legalMoves[index-1]
+        return score,legalMoves[bestindex]
 
     def minalphabetavalue(self,depth,gameState,agentnumber,alphavalue,betavalue):
         if depth == 0 or gameState.isWin() or gameState.isLose():
