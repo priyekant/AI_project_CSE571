@@ -223,7 +223,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         bestindex = 0
         for action in legalMoves:
             interscore = self.minalphabetavalue(self.depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue)
-            if score < interscore:
+            if score <= interscore:
                 score = interscore
                 bestindex = index
             if score >= betavalue:
@@ -242,7 +242,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = -sys.maxint
         for action in legalMoves:
             score = max(score,self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue))
-            if score >= betavalue:
+            if score > betavalue:
                 return score
             alphavalue = max(alphavalue,score)
         return score
@@ -259,7 +259,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 score = min(score,self.minalphabetavalue(depth,gameState.generateSuccessor(agentnumber,action), agentnumber+1,alphavalue,betavalue))
             else:
                 score = min(score,self.maxalphabetavalue(depth-1,gameState.generateSuccessor(agentnumber,action),alphavalue,betavalue))
-            if score <= alphavalue:
+            if score < alphavalue:
                 return score
             betavalue = min(betavalue,score)
 
