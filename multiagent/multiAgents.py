@@ -77,18 +77,9 @@ class ReflexAgent(Agent):
 
         """
         here we are going to update the score value on the basis of the distance
-        from the ghost, capsules and food
+        from the ghost and food
         """
         score = 0.0
-        """check distance from old capsule positions to know if the capsule has been eaten or not"""
-        for capsuleposition in currentGameState.getCapsules():
-            capsuledistance = manhattanDistance(capsuleposition, newPos)
-            if capsuledistance == 0:
-                """add 10 points if the new position is equal to capsule position in current state"""
-                score += 10.0
-            else:
-                """points are added to the total score, closer the capsule more the points encouraging pacman to take that path"""
-                score += 10.0/capsuledistance
 
         """check distance from newghoststates as ghosts are also moving"""
         for ghost in newGhostStates:
@@ -223,8 +214,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        score,move = self.maxalphabetavalue(self.depth,gameState,-sys.maxint,sys.maxint)
-        return move
+        legalMoves = gameState.getLegalActions(0)
+
+        alphavalue = -sys.maxint
+        betavalue = sys.maxint
+        score = -sys.maxint
+        index = 0
+        bestindex = 0
+        for action in legalMoves:
+            interscore = self.minalphabetavalue(self.depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue)
+            if score < interscore:
+                score = interscore
+                bestindex = index
+            if score >= betavalue:
+                return legalMoves[bestindex]
+            alphavalue = max(alphavalue,score)
+            index = index + 1
+        return legalMoves[bestindex]
 
     def maxalphabetavalue(self,depth,gameState,alphavalue,betavalue):
         """we check for terminal test condition, either game is over or we have
@@ -234,20 +240,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         legalMoves = gameState.getLegalActions(0)
 
         score = -sys.maxint
-        index = 0
-        bestindex = 0
         for action in legalMoves:
-            interscore = self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue)
-            if score < interscore:
-                score = interscore
-                bestindex = index
-
+            score = max(score,self.minalphabetavalue(depth,gameState.generateSuccessor(0,action), 1,alphavalue,betavalue))
             if score >= betavalue:
-                return score,legalMoves[bestindex]
+                return score
             alphavalue = max(alphavalue,score)
-            index += 1
-
-        return score,legalMoves[bestindex]
+        return score
 
     def minalphabetavalue(self,depth,gameState,agentnumber,alphavalue,betavalue):
         if depth == 0 or gameState.isWin() or gameState.isLose():
