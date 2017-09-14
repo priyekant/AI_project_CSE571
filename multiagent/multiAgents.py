@@ -326,7 +326,41 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    newPos = currentGameState.getPacmanPosition()
+    currentFood = currentGameState.getFood();
+    newGhostStates = currentGameState.getGhostStates()
+    "*** YOUR CODE HERE ***"
+
+    """
+    here we are going to update the score value on the basis of the distance
+    from the ghost and food
+    """
+    score = 0.0
+
+    """check distance from newghoststates as ghosts are also moving"""
+    for ghost in newGhostStates:
+        ghostdistance = manhattanDistance(ghost.getPosition(), newPos)
+        if(ghost.scaredTimer > 0):
+            """200 points are awarded if pacman eats ghost"""
+            if ghostdistance != 0:
+                score += 100.0/ghostdistance
+        else:
+            """500 points are lost if ghost eats pacman"""
+            if ghostdistance != 0:
+                score -= 100.0/ghostdistance
+    fooddistance = sys.maxint
+    for x in range(currentFood.width):
+      for y in range(currentFood.height):
+        if(currentFood[x][y]):
+          fooddistance=min(fooddistance,manhattanDistance(newPos,(x,y)))
+
+    score += 1.0/(fooddistance*fooddistance)
+
+    for capsuleposition in currentGameState.getCapsules():
+        capsuledistance = manhattanDistance(capsuleposition, newPos)
+        score += 1.0/(capsuledistance)
+
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
