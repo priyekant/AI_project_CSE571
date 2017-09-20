@@ -96,17 +96,16 @@ class ReflexAgent(Agent):
                     score += 100.0/ghostdistance
         numFood = currentGameState.getNumFood()
         """check distance from old capsule positions to know if the capsule has been eaten or not"""
-        for x in range(currentFood.width):
-          for y in range(currentFood.height):
-            if(currentFood[x][y]):
-              fooddistance=manhattanDistance(newPos,(x,y))
-              if(fooddistance==0):
+
+        for x in currentFood.asList():
+            fooddistance=manhattanDistance(newPos,x)
+            if(fooddistance==0):
                 """10 points are added to the score if pacman eats a food after takin this action"""
                 score+=10.0
                 """if in current state only one food was left and after taking this action pacman ate that food then add 500 points"""
                 if numFood == 1:
                     score += 500.0
-              else:
+            else:
                 """points are added to the total score, closer the food more the points encouraging pacman to take that path"""
                 score+=1.0/fooddistance
         return score
@@ -329,36 +328,26 @@ def betterEvaluationFunction(currentGameState):
     newPos = currentGameState.getPacmanPosition()
     currentFood = currentGameState.getFood();
     newGhostStates = currentGameState.getGhostStates()
-    "*** YOUR CODE HERE ***"
 
     """
     here we are going to update the score value on the basis of the distance
     from the ghost and food
     """
-    score = 0.0
+    score = currentGameState.getScore()
 
-    """check distance from newghoststates as ghosts are also moving"""
     for ghost in newGhostStates:
         ghostdistance = manhattanDistance(ghost.getPosition(), newPos)
         if(ghost.scaredTimer > 0):
-            """200 points are awarded if pacman eats ghost"""
             if ghostdistance != 0:
                 score += 100.0/ghostdistance
         else:
-            """500 points are lost if ghost eats pacman"""
             if ghostdistance != 0:
-                score -= 100.0/ghostdistance
+                score -= 10.0/ghostdistance
+
     fooddistance = sys.maxint
-    for x in range(currentFood.width):
-      for y in range(currentFood.height):
-        if(currentFood[x][y]):
-          fooddistance=min(fooddistance,manhattanDistance(newPos,(x,y)))
-
-    score += 1.0/(fooddistance*fooddistance)
-
-    for capsuleposition in currentGameState.getCapsules():
-        capsuledistance = manhattanDistance(capsuleposition, newPos)
-        score += 1.0/(capsuledistance)
+    for x in currentFood.asList():
+        fooddistance = manhattanDistance(newPos,x)
+        score += 1.0/fooddistance
 
     return score
 
