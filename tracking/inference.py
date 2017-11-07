@@ -481,10 +481,9 @@ class JointParticleFilter:
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
 
         "*** YOUR CODE HERE ***"
-        #belief = self.getBeliefDistribution()
+        belief = self.getBeliefDistribution()
 
-
-        """for index in range(self.numGhosts):
+        for index in range(self.numGhosts):
             if noisyDistances[index] != None:
                 for particle in belief:
                     trueDistance = util.manhattanDistance(particle[index], pacmanPosition);
@@ -492,37 +491,15 @@ class JointParticleFilter:
             elif noisyDistances[index] == None:
                 distribution = util.Counter()
                 for particle in belief:
-                    distribution[self.getParticleWithGhostInJail(particle, index)] += belief[particle]
+                    newParticle = self.getParticleWithGhostInJail(particle, index)
+                    distribution[newParticle] += belief[particle]
                 belief = distribution
-
 
         if belief.totalCount() == 0:
             self.initializeParticles()
         else:
             for i in range(self.numParticles):
-                self.particleslist[i] = util.sample(belief)"""
-        allPossible = util.Counter()
-        for p in self.particleslist:
-            newp = p
-            prod =1
-            for j in range(self.numGhosts):
-                if noisyDistances[j] == None:
-                    newp = self.getParticleWithGhostInJail(newp,j)
-                else:
-                    trueDistance = util.manhattanDistance(newp[j], pacmanPosition)
-                    prod = prod * emissionModels[j][trueDistance]
-            allPossible[newp] = allPossible[newp] + prod
-        allPossible.normalize()
-
-        totalCount = allPossible.totalCount()
-        if totalCount == 0:
-            self.initializeParticles()
-        else:
-            for i in range(self.numParticles):
-                self.particleslist[i] = util.sample(allPossible, self.prodList)
-                for j in range(self.numGhosts):
-                    if noisyDistances[j] == None:
-                        self.particleslist[i] = self.getParticleWithGhostInJail(self.particleslist[i],j)
+                self.particleslist[i] = util.sample(belief)
 
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
@@ -590,7 +567,7 @@ class JointParticleFilter:
                 newParticle[i] = util.sample(newPosDist,self.legalPositions)
             "*** END YOUR CODE HERE ***"
             newParticles.append(tuple(newParticle))
-        self.particlesList = newParticles
+        self.particleslist = newParticles
 
     def getBeliefDistribution(self):
         "*** YOUR CODE HERE ***"
