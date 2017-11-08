@@ -121,7 +121,7 @@ class DQN(object):
                 q_target = sample[3] + self.gamma * np.max(q_value_next_obs)
             q_values[sample[1]] = q_target
             obs_batch.append(sample[0])
-            target_q_batch.append(q_value_next_obs)
+            target_q_batch.append(q_values)
         obs_batch = np.reshape(obs_batch,[256,8])
         self.sess.run(self.optimizer,feed_dict={self.observation_input:np.array(obs_batch),self.q_target:np.array(target_q_batch)})
 
