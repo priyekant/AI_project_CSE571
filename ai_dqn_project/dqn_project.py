@@ -35,10 +35,11 @@ class DQN(object):
         self.sess = tf.Session()
 
         # A few starter hyperparameters
-        self.batch_size = 128
+        self.batch_size = 256
         self.gamma = 0.99
         # If using e-greedy exploration
         self.eps_start = 0.9
+        self.eps = self.eps_start
         self.eps_end = 0.05
         self.eps_decay = 1000 # in episodes
         # If using a target network
@@ -51,9 +52,11 @@ class DQN(object):
 
         # define yours training operations here...
         self.observation_input = tf.placeholder(tf.float32, shape=[None] + list(self.env.observation_space.shape))
-        q_values = self.build_model(self.observation_input)
+        self.q_values = self.build_model(self.observation_input)
 
-        # define your update operations here...
+        self.q_target = tf.placeholder(tf.float32,shape=[None , self.env.action_space.n ] )
+        self.loss = tf.losses.huber_loss(self.q_values,self.q_target)
+        self.optimizer = tf.train.AdamOptimizer(0.001).minimize(self.loss)
 
         self.num_episodes = 0
         self.num_steps = 0
@@ -69,8 +72,14 @@ class DQN(object):
 
         Currently returns an op that gives all zeros.
         """
-        with tf.variable_scope(scope):
-            return tf.Variable(tf.zeros((self.env.action_space.n,)))
+
+        x = tf.contrib.layers.fully_connected(observation_input, 96, activation_fn=tf.nn.relu)
+        x = tf.contrib.layers.fully_connected(x, 32, activation_fn=tf.nn.relu)
+        q_vals = tf.contrib.layers.fully_connected(x, self.env.action_space.n, activation_fn=None)
+
+        return q_vals
+        #with tf.variable_scope(scope):
+            #return tf.Variable(tf.zeros((self.env.action_space.n,)))
 
     def select_action(self, obs, evaluation_mode=False):
         """
@@ -82,14 +91,39 @@ class DQN(object):
 
         Currently returns a random action.
         """
-        return env.action_space.sample()
+
+        obs = np.reshape(obs,[1,8])
+
+        if evaluation_mode:
+            q_values = self.sess.run(self.q_values,feed_dict={self.observation_input:obs})
+            return np.argmax(q_values[0])
+        else:
+            if np.random.rand(1) < self.eps:
+                return env.action_space.sample()
+            else:
+                q_values = self.sess.run(self.q_values,feed_dict={self.observation_input:obs})
+                return np.argmax(q_values[0])
 
     def update(self):
         """
         TODO: Implement the functionality to update the network according to the
         Q-learning rule
         """
-        raise NotImplementedError
+        samples = self.replay_memory.sample(self.batch_size)
+        obs_batch = []
+        target_q_batch = []
+        for sample in samples:
+            q_values = self.sess.run(self.q_values,feed_dict={self.observation_input:sample[0]})[0]
+            q_value_next_obs = self.sess.run(self.q_values,feed_dict={self.observation_input:sample[2]})[0]
+            if sample[4]:
+                q_target = sample[3]
+            else:
+                q_target = sample[3] + self.gamma * np.max(q_value_next_obs)
+            q_values[sample[1]] = q_target
+            obs_batch.append(sample[0])
+            target_q_batch.append(q_value_next_obs)
+        obs_batch = np.reshape(obs_batch,[256,8])
+        self.sess.run(self.optimizer,feed_dict={self.observation_input:np.array(obs_batch),self.q_target:np.array(target_q_batch)})
 
     def train(self):
         """
@@ -102,11 +136,24 @@ class DQN(object):
         """
         done = False
         obs = env.reset()
+        #stepDrop = (self.eps_start - self.eps_end)/10000
+        obs = np.reshape(obs,[1,8])
+        i = 0
         while not done:
             action = self.select_action(obs, evaluation_mode=False)
             next_obs, reward, done, info = env.step(action)
+            next_obs = np.reshape(next_obs,[1,8])
             self.num_steps += 1
+            self.replay_memory.push(obs,action,next_obs,reward,done)
+            obs = next_obs
+        if self.num_episodes % 100 == 0 and self.eps > self.eps_end and self.num_episodes > 0:
+            self.eps -= 0.05
+            print(str(self.num_episodes) + " " + str(self.eps))
+        if self.num_steps >= self.batch_size:
+            self.update()
         self.num_episodes += 1
+
+
 
     def eval(self, save_snapshot=True):
         """
