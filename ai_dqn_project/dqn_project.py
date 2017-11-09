@@ -1,3 +1,8 @@
+#code has been referenced from the class slides and
+# https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-4-deep-q-networks-and-beyond-8438a3e2b8df
+# https://github.com/awjuliani/DeepRL-Agents/blob/master/Double-Dueling-DQN.ipynb
+# https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/tree/master/contents/5_Deep_Q_Network
+
 from __future__ import print_function
 import gym
 import tensorflow as tf
@@ -8,6 +13,8 @@ import env_wrappers
 import random
 import os
 import argparse
+import sys
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--eval', action="store_true", default=False, help='Run in eval mode')
@@ -44,6 +51,11 @@ class DQN(object):
         self.eps_decay = 1000 # in episodes
         # If using a target network
         self.clone_steps = 5000
+        self.myRewards = [0]*10
+        self.index = 0
+        self.maxepisode = -1
+        self.maxsum = 0
+        self.losslist = []
 
         # memory
         self.replay_memory = ReplayMemory(100000)
@@ -125,6 +137,10 @@ class DQN(object):
         obs_batch = np.reshape(obs_batch,[256,8])
         self.sess.run(self.optimizer,feed_dict={self.observation_input:np.array(obs_batch),self.q_target:np.array(target_q_batch)})
 
+        # code for graph accumulating data for graph
+        """_, loss = self.sess.run([self.optimizer,self.loss],feed_dict={self.observation_input:np.array(obs_batch),self.q_target:np.array(target_q_batch)})
+        self.losslist.append(loss)"""
+
     def train(self):
         """
         The training loop. This runs a single episode.
@@ -153,6 +169,12 @@ class DQN(object):
             self.update()
         self.num_episodes += 1
 
+        # code for plotting graph
+        """if self.num_episodes == 2000:
+            plt.plot(np.arange(len(self.losslist)), self.losslist)
+            plt.ylabel('Loss with epsilon 0.05')
+            plt.xlabel('episodes')
+            plt.show()"""
 
 
     def eval(self, save_snapshot=True):
@@ -164,7 +186,7 @@ class DQN(object):
         done = False
         obs = env.reset()
         while not done:
-            env.render()
+            #env.render()
             action = self.select_action(obs, evaluation_mode=True)
             obs, reward, done, info = env.step(action)
             total_reward += reward
@@ -173,12 +195,25 @@ class DQN(object):
             print ("Saving state with Saver")
             self.saver.save(self.sess, 'models/dqn-model', global_step=self.num_episodes)
 
+        self.myRewards[self.index%10] = total_reward
+        self.index = self.index + 1
+        if sum(self.myRewards)> self.maxsum:
+            self.maxepisode = self.num_episodes
+            self.maxsum = sum(self.myRewards)
+        print ("Max sum is " + str(self.maxsum))
+        print ("Episode with max sum is "+str(self.maxepisode))
+        if sum(self.myRewards) >= 1000 :
+            print ("training complete")
+            sys.exit()
+
+
 def train(dqn):
     for i in count(1):
         dqn.train()
         # every 10 episodes run an evaluation episode
         if i % 10 == 0:
             dqn.eval()
+
 
 def eval(dqn):
     """
